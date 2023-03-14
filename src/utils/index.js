@@ -9,4 +9,12 @@ const readFile = async (talkers) => {
   }
 };
 
-module.exports = { readFile };
+const writeFile = async (talkers, data) => {
+  try {
+    await fs.writeFile(talkers, JSON.stringify(data, null, 2));
+} catch (error) {
+    console.error(error);
+  }
+};
+
+module.exports = { readFile, writeFile };

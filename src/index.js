@@ -1,14 +1,12 @@
 const express = require('express');
-const { readFile } = require('./utils/index');
+const { readFile, writeFile } = require('./utils/index');
 const generateToken = require('./middlewares/generateToken');
 const validateEmail = require('./middlewares/validateEmail');
 const validatePassword = require('./middlewares/validatePassword');
 const validateToken = require('./middlewares/validateToken');
 const validateName = require('./middlewares/validateName');
 const validateAge = require('./middlewares/validateAge');
-const validateTalk = require('./middlewares/validateTalk');
-const validateWatchedAt = require('./middlewares/validateWatchedAt');
-const validateRate = require('./middlewares/validateRate');
+const { validateTalk, validateWatchedAt, validateRate } = require('./middlewares/validateTalk');
 
 const app = express();
 app.use(express.json());
@@ -49,7 +47,24 @@ app.get('/talker/:id', async (req, res) => {
 
 app.post('/talker', validateToken, validateName, validateAge, validateTalk, 
 validateWatchedAt, validateRate, async (req, res) => {
-  res.status(200).json({ message: 'teste' });
+  try {
+    const { name, age, talk, watchedAt, rate } = req.body;
+    const data = await readFile('./src/talker.json');
+
+    const newTalker = {
+      name,
+      age,
+      id: data.length + 1, 
+      talk,
+      watchedAt,
+      rate,
+    };
+    data.push(newTalker);
+    await writeFile('./src/talker.json', data);
+    res.status(201).json(newTalker);
+  } catch (error) {
+    console.error(error);
+  }
 });
 
 app.listen(PORT, () => {
