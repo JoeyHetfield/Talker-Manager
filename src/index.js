@@ -3,6 +3,12 @@ const { readFile } = require('./utils/index');
 const generateToken = require('./middlewares/generateToken');
 const validateEmail = require('./middlewares/validateEmail');
 const validatePassword = require('./middlewares/validatePassword');
+const validateToken = require('./middlewares/validateToken');
+const validateName = require('./middlewares/validateName');
+const validateAge = require('./middlewares/validateAge');
+const validateTalk = require('./middlewares/validateTalk');
+const validateWatchedAt = require('./middlewares/validateWatchedAt');
+const validateRate = require('./middlewares/validateRate');
 
 const app = express();
 app.use(express.json());
@@ -13,6 +19,11 @@ const PORT = process.env.PORT || '3001';
 // não remova esse endpoint, e para o avaliador funcionar
 app.get('/', (_request, response) => {
   response.status(HTTP_OK_STATUS).send();
+});
+
+app.post('/login', validateEmail, validatePassword, generateToken, async (req, res) => {
+  const { token } = req;
+  return res.status(200).json({ token });
 });
 
 app.get('/talker', async (req, res) => {
@@ -36,9 +47,9 @@ app.get('/talker/:id', async (req, res) => {
   return res.status(200).json(dataOne);
 });
 
-app.post('/login', validateEmail, validatePassword, generateToken, async (req, res) => {
-  const { token } = req;
-  return res.status(200).json({ token });
+app.post('/talker', validateToken, validateName, validateAge, validateTalk, 
+validateWatchedAt, validateRate, async (req, res) => {
+  res.status(200).json({ message: 'teste' });
 });
 
 app.listen(PORT, () => {
