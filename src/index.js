@@ -1,6 +1,8 @@
 const express = require('express');
 const { readFile } = require('./utils/index');
 const generateToken = require('./middlewares/generateToken');
+const validateEmail = require('./middlewares/validateEmail');
+const validatePassword = require('./middlewares/validatePassword');
 
 const app = express();
 app.use(express.json());
@@ -34,7 +36,7 @@ app.get('/talker/:id', async (req, res) => {
   return res.status(200).json(dataOne);
 });
 
-app.post('/login', generateToken, async (req, res) => {
+app.post('/login', validateEmail, validatePassword, generateToken, async (req, res) => {
   const { token } = req;
   return res.status(200).json({ token });
 });
