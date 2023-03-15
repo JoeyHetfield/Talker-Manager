@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const { readFile, writeFile } = require('./utils/index');
 const generateToken = require('./middlewares/generateToken');
 const validateEmail = require('./middlewares/validateEmail');
@@ -10,6 +11,7 @@ const { validateTalk, validateWatchedAt, validateRate } = require('./middlewares
 
 const app = express();
 app.use(express.json());
+const talkerPath = path.resolve(__dirname, './talker.json');
 
 const HTTP_OK_STATUS = 200;
 const PORT = process.env.PORT || '3001';
@@ -26,7 +28,7 @@ app.post('/login', validateEmail, validatePassword, generateToken, async (req, r
 
 app.get('/talker', async (req, res) => {
   try {
-    const data = await readFile('./src/talker.json');
+    const data = await readFile(talkerPath);
     if (data.length === 0) {
       res.status(200).json([]);
     } else res.status(200).json(data);
@@ -37,7 +39,7 @@ app.get('/talker', async (req, res) => {
 });
 
 app.get('/talker/:id', async (req, res) => {
-  const data = await readFile('./src/talker.json');
+  const data = await readFile(talkerPath);
   const dataOne = data.find((talker) => talker.id === Number(req.params.id));
   if (!dataOne) {
     return res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
@@ -49,7 +51,7 @@ app.post('/talker', validateToken, validateName, validateAge, validateTalk,
 validateWatchedAt, validateRate, async (req, res) => {
   try {
     const { name, age, talk, watchedAt, rate } = req.body;
-    const data = await readFile('./src/talker.json');
+    const data = await readFile(talkerPath);
 
     const newTalker = {
       name,
@@ -60,8 +62,30 @@ validateWatchedAt, validateRate, async (req, res) => {
       rate,
     };
     data.push(newTalker);
-    await writeFile('./src/talker.json', data);
+    await writeFile(talkerPath, data);
     res.status(201).json(newTalker);
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+app.put('/talker/:id', validateToken, validateName, validateAge, validateTalk, 
+validateWatchedAt, validateRate, async (req, res) => {
+  try { 
+    const { id } = req.params;
+    const { name, age, talk, watchedAt, rate } = req.body;
+    const data = await readFile(talkerPath);
+    const updateTalker = data.find((talker) => talker.id === Number(id));
+    if (!updateTalker) {
+      res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
+    }
+    updateTalker.name = name;
+    updateTalker.age = age;
+    updateTalker.talk = talk;
+    updateTalker.watchedAt = watchedAt;
+    updateTalker.rate = rate;
+    await writeFile(talkerPath, data);
+    res.status(200).json(updateTalker);
   } catch (error) {
     console.error(error);
   }
