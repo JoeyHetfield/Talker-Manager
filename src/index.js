@@ -21,6 +21,17 @@ app.get('/', (_request, response) => {
   response.status(HTTP_OK_STATUS).send();
 });
 
+app.get('/talker/search', validateToken, async (req, res) => {
+  const { q } = req.query;
+  const data = await readFile(talkerPath);
+  const searchTalker = data.filter((talker) => talker.name.includes(q));
+  if (!q) {
+    res.status(200).json(data);
+  } else if (!searchTalker) {
+    res.status(200).json([]);
+  } else return res.status(200).json(searchTalker);
+});
+
 app.post('/login', validateEmail, validatePassword, generateToken, async (req, res) => {
   const { token } = req;
   return res.status(200).json({ token });
