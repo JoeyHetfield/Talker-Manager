@@ -91,6 +91,15 @@ validateWatchedAt, validateRate, async (req, res) => {
   }
 });
 
+app.delete('/talker/:id', validateToken, async (req, res) => {
+  const { id } = req.params;
+  const data = await readFile(talkerPath);
+  const deleteTalker = data.filter((talker) => talker.id !== Number(id));
+  const updatatedTalker = JSON.stringify(deleteTalker);
+  await writeFile(talkerPath, updatatedTalker);
+  res.status(204).end();
+});
+
 app.listen(PORT, () => {
   console.log('Online');
 });
